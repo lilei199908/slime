@@ -68,6 +68,7 @@ def train(args):
         if args.offload:
             ray.get(actor_model.async_offload())
             ray.get(rollout_manager.async_onload())
+
         ray.get(rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei', 1 , 1))
         ray.get(actor_model.async_update_weights())
         ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
