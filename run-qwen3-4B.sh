@@ -49,7 +49,7 @@ ROLLOUT_ARGS=(
    --rollout-temperature 0.8
    --rollout-top-k 1
 
-   --global-batch-size 32
+   --global-batch-size 160
    --balance-data
 )
 
