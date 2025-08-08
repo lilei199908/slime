@@ -68,9 +68,9 @@ def train(args):
         if args.offload:
             ray.get(actor_model.async_offload())
             ray.get(rollout_manager.async_onload())
-        rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei', 1 , 1)
+        ray.get(rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei', 1 , 1))
         ray.get(actor_model.async_update_weights())
-        rollout_manager.rollout_engines[0].stop_profile.remote()
+        ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
 
         if args.eval_interval is not None and (
             (rollout_id + 1) % args.eval_interval == 0
