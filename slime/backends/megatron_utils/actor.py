@@ -20,7 +20,7 @@ from slime.utils.wandb_utils import init_wandb_secondary
 
 from ..utils.data import process_rollout_data
 from .checkpoint import load_checkpoint
-from .data import get_data_iterator, log_eval_data, log_perf_data, log_rollout_data
+from .data import get_data_iterator, log_perf_data, log_rollout_data
 from .initialize import get_gloo_group, init, is_megatron_main_rank
 from .loss import compute_advantages_and_returns
 from .model import forward_only, initialize_model_and_optimizer, save, train
@@ -64,11 +64,6 @@ class MegatronTrainRayActor(TrainRayActor):
         if self.args.keep_old_actor:
             self.load_other_checkpoint("old_actor", args.load)
 
-        if self.args.offload:
-            # recover to actor in the end.
-            self.update_gpu_params_dict(self.weights["actor"])
-            self.sleep(("model"))
-
         update_weight_cls = UpdateWeightFromTensor if self.args.colocate else UpdateWeightFromDistributed
         self.weight_updator = update_weight_cls(
             self.args,
@@ -81,6 +76,11 @@ class MegatronTrainRayActor(TrainRayActor):
 
         # empty cache after initialization
         clear_memory()
+
+        if self.args.offload:
+            # recover to actor in the end.
+            self.update_gpu_params_dict(self.weights["actor"])
+            self.sleep(("model"))
 
         self.rollout_engines = None
         self.data_buffer = None
@@ -119,26 +119,34 @@ class MegatronTrainRayActor(TrainRayActor):
         clear_memory()
         print_memory(f"before offload model")
         self.update_cpu_params_dict(self.weights["actor"])
+        if hasattr(mpu, "destroy_process_groups"):
+            mpu.destroy_process_groups()
 
-        allocator = CuMemAllocator.get_instance()
-        allocator.sleep(offload_tags=tags)
+        if self.args.experimental_offload:
+            self.libcudart.pause()
+        else:
+            allocator = CuMemAllocator.get_instance()
+            allocator.sleep(offload_tags=tags)
 
-        clear_memory()
         print_memory(f"after offload model")
 
     @timer
     def wake_up(self, tags):
         assert self.args.offload
-        clear_memory()
         print_memory("before wake_up model")
 
         if isinstance(tags, str):
             tags = (tags,)
 
-        allocator = CuMemAllocator.get_instance()
-        allocator.wake_up(tags)
+        if self.args.experimental_offload:
+            self.libcudart.resume()
+        else:
+            allocator = CuMemAllocator.get_instance()
+            allocator.wake_up(tags)
 
         clear_memory()
+        if hasattr(mpu, "reload_process_groups"):
+            mpu.reload_process_groups()
         print_memory("after wake_up model")
 
     def set_data_buffer(self, data_buffer):
@@ -255,13 +263,6 @@ class MegatronTrainRayActor(TrainRayActor):
         log_perf_data(rollout_id, self.args)
         Timer().start("train_wait")
 
-    def eval(self, rollout_id, rollout_data_ref):
-        if self.args.debug_train_only:
-            return
-
-        # TODO: is logging enough?
-        log_eval_data(rollout_id, self.args, rollout_data_ref)
-
     def save_model(self, iteration, with_optimizer=True):
         if self.args.debug_rollout_only:
             return
@@ -285,15 +286,23 @@ class MegatronTrainRayActor(TrainRayActor):
         if self.args.debug_train_only or self.args.debug_rollout_only:
             return
 
-        torch.cuda.empty_cache()
+        if hasattr(mpu, "reload_process_groups"):
+            mpu.reload_process_groups()
+        if self.args.experimental_offload:
+            self.libcudart.disable()
+
         self.weight_updator.update_weights()
         dist.barrier(group=get_gloo_group())
-        clear_memory()
         print_memory("after update_weights")
 
         if getattr(self.args, "keep_old_actor", False):
             print("update rollout model on cpu using actor model")
             self.update_cpu_params_dict(self.weights["old_actor"])
+
+        if self.args.experimental_offload:
+            self.libcudart.enable()
+        if hasattr(mpu, "destroy_process_groups"):
+            mpu.destroy_process_groups()
 
     def load_other_checkpoint(self, model_tag, path):
         old_args = self.args.load, self.args.no_load_optim, self.args.no_load_rng, self.args.finetune

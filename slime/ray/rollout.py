@@ -9,6 +9,7 @@ from slime.backends.sglang_utils.sglang_engine import SGLangEngine
 from slime.ray.buffer import Buffer
 from slime.utils.http_utils import find_available_port, get_host_info, run_router
 from .utils import Lock
+from typing import List
 
 
 def create_rollout_engines(args, pg):
@@ -38,6 +39,12 @@ def create_rollout_engines(args, pg):
                 num_cpus=num_cpus,
                 num_gpus=num_gpus,
                 scheduling_strategy=scheduling_strategy,
+                runtime_env={
+                    "env_vars": {
+                        "RAY_EXPERIMENTAL_NOSET_CUDA_VISIBLE_DEVICES": "1",
+                        "RAY_EXPERIMENTAL_NOSET_HIP_VISIBLE_DEVICES": "1",
+                    }
+                },
             ).remote(args, rank=i)
         )
 
@@ -158,11 +165,14 @@ class RolloutManager:
             num_gpus=0,
         ).remote()
 
-    def async_generate(self, rollout_id, evaluation=False):
-        return self.data_buffer.generate.remote(rollout_id, evaluation=evaluation)
+    def async_generate(self, rollout_id):
+        return self.data_buffer.generate.remote(rollout_id)
+
+    def async_eval(self, rollout_id):
+        return self.data_buffer.eval.remote(rollout_id)
 
     def async_offload(self):
         return [engine.release_memory_occupation.remote() for engine in self.rollout_engines]
 
-    def async_onload(self):
-        return [engine.resume_memory_occupation.remote() for engine in self.rollout_engines]
+    def async_onload(self, tags: List[str] = None):
+        return [engine.resume_memory_occupation.remote(tags=tags) for engine in self.rollout_engines]

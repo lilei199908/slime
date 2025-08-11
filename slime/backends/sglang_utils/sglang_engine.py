@@ -1,6 +1,5 @@
 import dataclasses
 
-import os
 
 from sglang.srt.server_args import ServerArgs
 from slime.utils.http_utils import get_host_info
@@ -81,9 +80,6 @@ class SGLangEngine(RayActor):
     def init(self, dist_init_addr, port, nccl_port):
         args = self.args
         rank = self.rank
-
-        # remove the CUDA_VISIBLE_DEVICES set by ray and use base_gpu_id
-        os.environ.pop("CUDA_VISIBLE_DEVICES", None)
 
         nnodes = max(1, args.rollout_num_gpus_per_engine // args.rollout_num_gpus_per_node)
         node_rank = rank % nnodes
@@ -203,8 +199,14 @@ class SGLangEngine(RayActor):
     def release_memory_occupation(self):
         return self._make_request("release_memory_occupation")
 
-    def resume_memory_occupation(self):
-        return self._make_request("resume_memory_occupation")
+    def resume_memory_occupation(self, tags: List[str] = None):
+        """
+        Available tags for multi-stage resume: weights, kv_cache
+        """
+        return self._make_request(
+            "resume_memory_occupation",
+            {"tags": tags},
+        )
 
     def init_weights_update_group(self, master_address, master_port, rank_offset, world_size, group_name, backend):
         return self._make_request(

@@ -3,6 +3,7 @@ import ray
 from slime.ray.placement_group import create_actor_group, create_placement_groups, create_rollout_manager
 from slime.utils.arguments import parse_args
 from slime.utils.wandb_utils import init_wandb_primary
+from sglang.srt.constants import GPU_MEMORY_TYPE_KV_CACHE, GPU_MEMORY_TYPE_WEIGHTS
 
 
 def train(args):
@@ -37,18 +38,20 @@ def train(args):
     ray.get(actor_model.async_init_weight_update_connections(rollout_manager))
 
     if args.offload:
-        ray.get(rollout_manager.async_onload())
+        ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_WEIGHTS]))
 
     # always update weight first so that sglang has the loaded weights from training.
     ray.get(actor_model.async_update_weights())
+
+    if args.offload:
+        ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_KV_CACHE]))
 
     # train loop.
     # note that for async training, one can change the position of the sync operation(ray.get).
     for rollout_id in range(args.start_rollout_id, args.num_rollout):
         # TODO extract the duplicated eval logic
         if args.eval_interval is not None and rollout_id == 0:
-            eval_rollout_data_ref = ray.get(rollout_manager.async_generate(rollout_id, evaluation=True))
-            ray.get(actor_model.async_eval(rollout_id, eval_rollout_data_ref))
+            ray.get(rollout_manager.async_eval(rollout_id))
 
         rollout_data_ref = ray.get(rollout_manager.async_generate(rollout_id))
 
@@ -67,18 +70,20 @@ def train(args):
 
         if args.offload:
             ray.get(actor_model.async_offload())
-            ray.get(rollout_manager.async_onload())
+            ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_WEIGHTS]))
 
         ray.get(rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei'))
         ray.get(actor_model.async_update_weights())
         ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
 
+        if args.offload:
+            ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_KV_CACHE]))
+
         if args.eval_interval is not None and (
             (rollout_id + 1) % args.eval_interval == 0
             or (num_rollout_per_epoch is not None and (rollout_id + 1) % num_rollout_per_epoch == 0)
         ):
-            eval_rollout_data_ref = ray.get(rollout_manager.async_generate(rollout_id, evaluation=True))
-            ray.get(actor_model.async_eval(rollout_id, eval_rollout_data_ref))
+            ray.get(rollout_manager.async_eval(rollout_id))
 
 
 if __name__ == "__main__":

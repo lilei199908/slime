@@ -45,7 +45,13 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
                 help="Number of GPUs per inference engine, just like the tp_size in sglang.",
             )
             parser.add_argument(
-                "--rollout-num-gpus-per-node", type=int, default=8, help="Number of gpus per node for rollout"
+                "--rollout-num-gpus-per-node",
+                type=int,
+                default=8,
+                help=(
+                    "Number of gpus per node for rollout."
+                    "Notice: If you are going to use less than 8 gpus per node under colocate mode, you should set this number."
+                ),
             )
             parser.add_argument(
                 "--colocate",
@@ -63,6 +69,14 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
                 help=(
                     "Whether to offload the rollout generator and training actor to CPU during training. "
                     "This will always be true when --colocate is set."
+                ),
+            )
+            parser.add_argument(
+                "--experimental-offload",
+                action="store_true",
+                default=False,
+                help=(
+                    "Enable a more aggressive offload strategy that uses pytorch_malloc to offload the CUDA memory. "
                 ),
             )
 
@@ -385,7 +399,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
                 "--n-samples-per-prompt", type=int, default=1, help="Number of responses for each prompt in generation"
             )
 
-            # gbs of the training, not that the gbs if of sample, not of prompts,
+            # gbs of the training, note that the gbs is of sample, not of prompts,
             # so if you hope to train 1 step for each rollout, the global_bach_size should be set as
             # `rollout_batch_size * n_samples_per_prompt`.
             reset_megatron_args(parser, "--global-batch-size", None)
@@ -427,7 +441,7 @@ def get_slime_extra_args_provider(add_custom_arguments=None):
                 default=None,
                 help=(
                     "The maximum number of tokens per GPU for dynamic batch size. "
-                    "Not that when enabling context parallel (CP), the max tokens per gpu should be around "
+                    "Note that when enabling context parallel (CP), the max tokens per gpu should be around "
                     "`max_response_len // cp_size` instead of `max_response_len`."
                 ),
             )
