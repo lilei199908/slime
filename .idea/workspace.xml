@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1532fb32-1b90-466f-9fab-732e956ed96c" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run-qwen3-30B-A3B.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run-qwen3-30B-A3B.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +73,7 @@
       <workItem from="1754638160963" duration="7542000" />
       <workItem from="1754650274474" duration="34656000" />
       <workItem from="1754993402093" duration="3814000" />
-      <workItem from="1755053714606" duration="2709000" />
+      <workItem from="1755053714606" duration="3849000" />
     </task>
     <servers />
   </component>
