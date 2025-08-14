@@ -11,7 +11,7 @@ from slime.utils.types import Sample
 from slime.ray.rollout_data_source import RolloutDataSource
 from slime.utils.ray_utils import Box
 from slime.utils.wandb_utils import init_wandb_secondary
-from slime.utils.timer import timer
+from slime.utils.timer import timer, Timer
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
