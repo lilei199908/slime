@@ -36,20 +36,20 @@ CKPT_ARGS=(
 )
 
 ROLLOUT_ARGS=(
-   --prompt-data /data1/lilei/dapo-math-17k/dapo-math-17k.jsonl
+   --prompt-data /data1/lilei/aime-2024/aime-2024.jsonl
    --input-key prompt
    --label-key label
    --apply-chat-template
    --rollout-shuffle
    --rm-type deepscaler
-   --num-rollout 1
-   --rollout-batch-size 32
-   --n-samples-per-prompt 5
+   --num-rollout 2
+   --rollout-batch-size 30
+   --n-samples-per-prompt 4
    --rollout-max-response-len 8192
    --rollout-temperature 0.8
    --rollout-top-k 1
 
-   --global-batch-size 160
+   --global-batch-size 120
    --balance-data
 )
 

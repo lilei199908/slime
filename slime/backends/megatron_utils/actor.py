@@ -282,7 +282,7 @@ class MegatronTrainRayActor(TrainRayActor):
         dist.barrier(group=get_gloo_group())
 
     @timer
-    def update_weights(self):
+    def  update_weights(self):
         with torch.profiler.profile(
             activities=[
                 torch.profiler.ProfilerActivity.CPU,
