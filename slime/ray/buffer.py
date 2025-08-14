@@ -134,7 +134,7 @@ class Buffer:
             )
         data = self._convert_samples_to_train_data(data)
 
-        timer_instance = timer()
+        timer_instance = Timer()
         log_dict = {f"perf/{key}_time": val for key, val in timer_instance.log_dict().items()}
         print(f"perf {rollout_id}: {log_dict}")
         timer_instance.reset()
