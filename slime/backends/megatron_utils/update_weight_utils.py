@@ -332,6 +332,7 @@ class UpdateWeightFromTensor:
             on_trace_ready=torch.profiler.tensorboard_trace_handler('/data1/lilei/once'),
             record_shapes=True,
             profile_memory=True,
+            with_stack=True,
         ) as prof:
             rank = dist.get_rank()
             if rank == 0:
