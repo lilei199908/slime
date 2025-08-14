@@ -45,7 +45,7 @@ ROLLOUT_ARGS=(
    --num-rollout 2
    --rollout-batch-size 30
    --n-samples-per-prompt 4
-   --rollout-max-response-len 8192
+   --rollout-max-response-len 2048
    --rollout-temperature 0.8
    --rollout-top-k 1
 
