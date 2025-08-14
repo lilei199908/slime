@@ -11,7 +11,7 @@ from slime.utils.types import Sample
 from slime.ray.rollout_data_source import RolloutDataSource
 from slime.utils.ray_utils import Box
 from slime.utils.wandb_utils import init_wandb_secondary
-
+from slime.utils.timer import timer
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
@@ -107,16 +107,17 @@ class Buffer:
     def generate(self, rollout_id):
         self.rollout_id = rollout_id
 
-        if self.args.load_debug_rollout_data:
-            data = torch.load(
-                open(self.args.load_debug_rollout_data.format(rollout_id=rollout_id), "rb"),
-            )["samples"]
-            data = [Sample.from_dict(sample) for sample in data]
-        else:
-            data = self.generate_rollout(self.args, rollout_id, self, evaluation=False)
-            # flatten the data if it is a list of lists
-            if isinstance(data[0], list):
-                data = sum(data, [])
+        with timer("rollout"):
+            if self.args.load_debug_rollout_data:
+                data = torch.load(
+                    open(self.args.load_debug_rollout_data.format(rollout_id=rollout_id), "rb"),
+                )["samples"]
+                data = [Sample.from_dict(sample) for sample in data]
+            else:
+                data = self.generate_rollout(self.args, rollout_id, self, evaluation=False)
+                # flatten the data if it is a list of lists
+                if isinstance(data[0], list):
+                    data = sum(data, [])
 
         # TODO to be refactored (originally Buffer._set_data)
         # TODO extract to a function during refactor
