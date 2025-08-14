@@ -137,6 +137,7 @@ class Buffer:
         timer_instance = timer()
         log_dict = {f"perf/{key}_time": val for key, val in timer_instance.log_dict().items()}
         print(f"perf {rollout_id}: {log_dict}")
+        timer_instance.reset()
 
         return Box(ray.put(data))
 
