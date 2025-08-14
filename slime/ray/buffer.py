@@ -133,6 +133,11 @@ class Buffer:
                 path,
             )
         data = self._convert_samples_to_train_data(data)
+
+        timer_instance = timer()
+        log_dict = {f"perf/{key}_time": val for key, val in timer_instance.log_dict().items()}
+        print(f"perf {rollout_id}: {log_dict}")
+
         return Box(ray.put(data))
 
     def eval(self, rollout_id):
