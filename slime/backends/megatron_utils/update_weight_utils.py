@@ -324,30 +324,20 @@ class UpdateWeightFromTensor:
                 self._ipc_engine = engine
 
     def update_weights(self):
-        with torch.profiler.profile(
-            activities=[
-                torch.profiler.ProfilerActivity.CPU,
-                torch.profiler.ProfilerActivity.CUDA,
-            ],
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('/data1/lilei/once'),
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=True,
-        ) as prof:
-            rank = dist.get_rank()
-            if rank == 0:
-                ray.get([engine.flush_cache.remote() for engine in self.rollout_engines])
-            dist.barrier(group=get_gloo_group())
-            if self.args.experimental_offload:
-                pool = torch.cuda.MemPool(self.allocator)
-            with torch.cuda.use_mem_pool(pool) if self.args.experimental_offload else nullcontext():
-                for param_infos in tqdm(self.param_info_buckets, disable=rank != 0, desc="Update weights"):
-                    self._update_bucket_weights_from_tensor(param_infos)
+        rank = dist.get_rank()
+        if rank == 0:
+            ray.get([engine.flush_cache.remote() for engine in self.rollout_engines])
+        dist.barrier(group=get_gloo_group())
+        if self.args.experimental_offload:
+            pool = torch.cuda.MemPool(self.allocator)
+        with torch.cuda.use_mem_pool(pool) if self.args.experimental_offload else nullcontext():
+            for param_infos in tqdm(self.param_info_buckets, disable=rank != 0, desc="Update weights"):
+                self._update_bucket_weights_from_tensor(param_infos)
 
-            dist.barrier(group=get_gloo_group())
-            if self.args.experimental_offload:
-                # must manually delete here to release the memory
-                del pool
+        dist.barrier(group=get_gloo_group())
+        if self.args.experimental_offload:
+            # must manually delete here to release the memory
+            del pool
 
     def _update_bucket_weights_from_tensor(self, param_infos):
         monkey_patch_torch_reductions()
