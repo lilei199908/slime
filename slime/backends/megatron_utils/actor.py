@@ -283,35 +283,26 @@ class MegatronTrainRayActor(TrainRayActor):
 
     @timer
     def update_weights(self):
-        with torch.profiler.profile(
-            activities=[
-                torch.profiler.ProfilerActivity.CPU,
-                torch.profiler.ProfilerActivity.CUDA,
-            ],
-            on_trace_ready=torch.profiler.tensorboard_trace_handler('/data1/lilei/once'),
-            record_shapes=True,
-            profile_memory=True,
-        ) as prof:
-            if self.args.debug_train_only or self.args.debug_rollout_only:
-                return
+        if self.args.debug_train_only or self.args.debug_rollout_only:
+            return
 
-            if hasattr(mpu, "reload_process_groups"):
-                mpu.reload_process_groups()
-            if self.args.experimental_offload:
-                self.libcudart.disable()
+        if hasattr(mpu, "reload_process_groups"):
+            mpu.reload_process_groups()
+        if self.args.experimental_offload:
+            self.libcudart.disable()
 
-            self.weight_updator.update_weights()
-            dist.barrier(group=get_gloo_group())
-            print_memory("after update_weights")
+        self.weight_updator.update_weights()
+        dist.barrier(group=get_gloo_group())
+        print_memory("after update_weights")
 
-            if getattr(self.args, "keep_old_actor", False):
-                print("update rollout model on cpu using actor model")
-                self.update_cpu_params_dict(self.weights["old_actor"])
+        if getattr(self.args, "keep_old_actor", False):
+            print("update rollout model on cpu using actor model")
+            self.update_cpu_params_dict(self.weights["old_actor"])
 
-            if self.args.experimental_offload:
-                self.libcudart.enable()
-            if hasattr(mpu, "destroy_process_groups"):
-                mpu.destroy_process_groups()
+        if self.args.experimental_offload:
+            self.libcudart.enable()
+        if hasattr(mpu, "destroy_process_groups"):
+            mpu.destroy_process_groups()
 
     def load_other_checkpoint(self, model_tag, path):
         old_args = self.args.load, self.args.no_load_optim, self.args.no_load_rng, self.args.finetune
