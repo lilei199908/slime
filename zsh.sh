@@ -6,28 +6,36 @@ apt-get install -y zsh
 zsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-echo "install themes"
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
-source ~/.zshrc
 
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-sed -i '/^plugins=/,/^)/ d' ~/.zshrc  # 删除 plugins=( ... ) 整个块
 # 然后追加新的 plugins 定义
-cat >> ~/.zshrc << 'EOF'
 plugins=(
     git                    # 内置 git 插件
     zsh-autosuggestions    # 命令自动建议（灰色提示）
     zsh-syntax-highlighting # 命令语法高亮（正确绿色，错误红色）
 )
-EOF
-
-cat >> ~/.bashrc << 'EOF'
-
-# 自动进入工作目录并启动 zsh
-cd /data1/lilei
-zsh
-EOF
-
 source ~/.zshrc
+
+ray start --head \
+  --node-ip-address=0.0.0.0 \
+  --num-gpus=8 \
+  --include-dashboard=true \
+  --dashboard-host=0.0.0.0
+
+ray start --address=10.249.32.139:6379 --num-gpus=8
+
+docker run --gpus all \
+  --ipc=host \
+  --ulimit memlock=-1 \
+  --ulimit stack=67108864 \
+  -v /data1/lilei:/data1/lilei \
+  --network host \
+  --name openrlhfl \
+  -it nvcr.io/nvidia/pytorch:25.02-py3
+
+zhuzilin/slime:latest
+
+nvcr.io/nvidia/pytorch:25.02-py3
+
+hebiaobuaa/verl:app-verl0.5-sglang0.4.9.post6-mcore0.12.2-te2.2
