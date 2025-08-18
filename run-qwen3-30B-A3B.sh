@@ -42,7 +42,7 @@ ROLLOUT_ARGS=(
    --apply-chat-template
    --rollout-shuffle
    --rm-type deepscaler
-   --num-rollout 2
+   --num-rollout 1
    --rollout-batch-size 16
    --n-samples-per-prompt 5
    --rollout-max-response-len 2048
@@ -67,7 +67,7 @@ PERF_ARGS=(
    --sequence-parallel
    --pipeline-model-parallel-size 1
    --context-parallel-size 1
-   --expert-model-parallel-size 16
+   --expert-model-parallel-size 8
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full
