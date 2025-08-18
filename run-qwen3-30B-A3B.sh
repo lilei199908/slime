@@ -137,7 +137,8 @@ RUNTIME_ENV_JSON="{
     \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
     \"NCCL_DEBUG\": \"INFO\",
-    \"NCCL_SOCKET_IFNAME\": \"eth_rdma0,eth_rdma1,eth_rdma2,eth_rdma3\"
+    \"NCCL_SOCKET_IFNAME\": \"bond0\",
+    \"NCCL_IB_HCA\": \"mlx5_0,mlx5_1,mlx5_4,mlx5_5\"
   }
 }"
 
