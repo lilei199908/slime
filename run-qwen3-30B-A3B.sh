@@ -44,12 +44,12 @@ ROLLOUT_ARGS=(
    --rm-type deepscaler
    --num-rollout 2
    --rollout-batch-size 30
-   --n-samples-per-prompt 4
+   --n-samples-per-prompt 16
    --rollout-max-response-len 2048
    --rollout-temperature 0.8
    --rollout-top-k 1
 
-   --global-batch-size 120
+   --global-batch-size 480
    --balance-data
 )
 
@@ -74,8 +74,8 @@ PERF_ARGS=(
    --recompute-method uniform
    --recompute-num-layers 1
 
-   # --micro-batch-size 1
-   --use-dynamic-batch-size
+    --micro-batch-size 480
+#   --use-dynamic-batch-size
    --max-tokens-per-gpu 20480
 )
 
