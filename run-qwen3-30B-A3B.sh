@@ -1,30 +1,30 @@
 #!/bin/bash
 
 # for rerun the task
-pkill -9 sglang
-sleep 3
-ray stop --force
-pkill -9 ray
-pkill -9 python
-sleep 3
-pkill -9 ray
-pkill -9 python
-
-set -ex
-
-# will prevent ray from buffering stdout/stderr
-export PYTHONBUFFERED=16
-
-NVLINK_COUNT=$(nvidia-smi | grep -o "NVLink" | wc -l)
-if [ "$NVLINK_COUNT" -gt 0 ]; then
-    HAS_NVLINK=1
-else
-    HAS_NVLINK=0
-fi
-echo "HAS_NVLINK: $HAS_NVLINK (detected $NVLINK_COUNT NVLink references)"
-
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-source "${SCRIPT_DIR}/scripts/models/qwen3-30B-A3B.sh"
+#pkill -9 sglang
+#sleep 3
+#ray stop --force
+#pkill -9 ray
+#pkill -9 python
+#sleep 3
+#pkill -9 ray
+#pkill -9 python
+#
+#set -ex
+#
+## will prevent ray from buffering stdout/stderr
+#export PYTHONBUFFERED=16
+#
+#NVLINK_COUNT=$(nvidia-smi | grep -o "NVLink" | wc -l)
+#if [ "$NVLINK_COUNT" -gt 0 ]; then
+#    HAS_NVLINK=1
+#else
+#    HAS_NVLINK=0
+#fi
+#echo "HAS_NVLINK: $HAS_NVLINK (detected $NVLINK_COUNT NVLink references)"
+#
+#SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+#source "${SCRIPT_DIR}/scripts/models/qwen3-30B-A3B.sh"
 
 CKPT_ARGS=(
    --hf-checkpoint /data1/lilei/Qwen3-30B-A3B
