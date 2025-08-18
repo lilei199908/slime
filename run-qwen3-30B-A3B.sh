@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # for rerun the task
-#pkill -9 sglang
-#sleep 3
-#ray stop --force
-#pkill -9 ray
-#pkill -9 python
-#sleep 3
-#pkill -9 ray
-#pkill -9 python
+pkill -9 sglang
+sleep 3
+ray stop --force
+pkill -9 ray
+pkill -9 python
+sleep 3
+pkill -9 ray
+pkill -9 python
 
 set -ex
 
@@ -42,7 +42,7 @@ ROLLOUT_ARGS=(
    --apply-chat-template
    --rollout-shuffle
    --rm-type deepscaler
-   --num-rollout 2
+   --num-rollout 1
    --rollout-batch-size 16
    --n-samples-per-prompt 5
    --rollout-max-response-len 2048
@@ -127,8 +127,8 @@ MISC_ARGS=(
 )
 
 # launch the master node of ray in container
-export MASTER_ADDR=${MASTER_ADDR:-"10.249.32.139"}
-#ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
+export MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
+ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
 
 # Build the runtime environment JSON with proper variable substitution
 RUNTIME_ENV_JSON="{
@@ -143,10 +143,10 @@ RUNTIME_ENV_JSON="{
   }
 }"
 
-ray job submit --address="http://10.249.32.139:8265" \
+ray job submit --address="http://127.0.0.1:8265" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 /data1/lilei/slime/train.py \
-   --actor-num-nodes 2 \
+   --actor-num-nodes 1 \
    --actor-num-gpus-per-node 8 \
    --colocate \
    ${MODEL_ARGS[@]} \
