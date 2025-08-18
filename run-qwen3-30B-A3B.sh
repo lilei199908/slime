@@ -135,11 +135,12 @@ RUNTIME_ENV_JSON="{
   \"env_vars\": {
     \"PYTHONPATH\": \"/root/Megatron-LM/\",
     \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
-    \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\"
+    \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
+    \"NCCL_DEBUG\": \"INFO\"
   }
 }"
 
-ray job submit --address="http://127.0.0.1:8265" \
+ray job submit --address="http://10.249.32.139:8265" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 /data1/lilei/slime/train.py \
    --actor-num-nodes 2 \
