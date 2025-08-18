@@ -43,13 +43,13 @@ ROLLOUT_ARGS=(
    --rollout-shuffle
    --rm-type deepscaler
    --num-rollout 2
-   --rollout-batch-size 16
-   --n-samples-per-prompt 5
+   --rollout-batch-size 30
+   --n-samples-per-prompt 4
    --rollout-max-response-len 2048
    --rollout-temperature 0.8
    --rollout-top-k 1
 
-   --global-batch-size 80
+   --global-batch-size 120
    --balance-data
 )
 
@@ -65,7 +65,7 @@ EVAL_ARGS=(
 PERF_ARGS=(
    --tensor-model-parallel-size 4
    --sequence-parallel
-   --pipeline-model-parallel-size 1
+   --pipeline-model-parallel-size 2
    --context-parallel-size 1
    --expert-model-parallel-size 8
    --expert-tensor-parallel-size 1
@@ -138,7 +138,8 @@ RUNTIME_ENV_JSON="{
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
     \"NCCL_SOCKET_IFNAME\": \"bond0\",
     \"NCCL_IB_HCA\": \"mlx5_0,mlx5_1,mlx5_4,mlx5_5\",
-    \"GLOO_SOCKET_IFNAME\": \"bond0\"
+    \"GLOO_SOCKET_IFNAME\": \"bond0\",
+    \"NCCL_DEBUG\": \"WARN\"
   }
 }"
 

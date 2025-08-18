@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1532fb32-1b90-466f-9fab-732e956ed96c" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run-qwen3-4B.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run-qwen3-4B.sh" afterDir="false" />
-    </list>
+    <list default="true" id="1532fb32-1b90-466f-9fab-732e956ed96c" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -80,6 +77,7 @@
       <workItem from="1755168519261" duration="5030000" />
       <workItem from="1755243793143" duration="2064000" />
       <workItem from="1755247701997" duration="283000" />
+      <workItem from="1755250757705" duration="19036000" />
     </task>
     <servers />
   </component>
