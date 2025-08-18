@@ -138,7 +138,8 @@ RUNTIME_ENV_JSON="{
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
     \"NCCL_DEBUG\": \"INFO\",
     \"NCCL_SOCKET_IFNAME\": \"bond0\",
-    \"NCCL_IB_HCA\": \"mlx5_0,mlx5_1,mlx5_4,mlx5_5\"
+    \"NCCL_IB_HCA\": \"mlx5_0,mlx5_1,mlx5_4,mlx5_5\",
+    \"GLOO_SOCKET_IFNAME\": \"bond0\"
   }
 }"
 
