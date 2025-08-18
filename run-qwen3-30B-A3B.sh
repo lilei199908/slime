@@ -136,7 +136,9 @@ RUNTIME_ENV_JSON="{
     \"PYTHONPATH\": \"/root/Megatron-LM/\",
     \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
-    \"NCCL_DEBUG\": \"INFO\"
+    \"NCCL_DEBUG\": \"INFO\",
+    \"NCCL_SOCKET_IFNAME\": \"eth_rdma0,eth_rdma1,eth_rdma2,eth_rdma3\",
+    \"GLOO_SOCKET_IFNAME\": \"eth_rdma0,eth_rdma1,eth_rdma2,eth_rdma3\",
   }
 }"
 
