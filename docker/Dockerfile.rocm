@@ -234,7 +234,7 @@ RUN pip uninstall -y megatron-core && \
 ENV HIPCC_COMPILE_FLAGS_APPEND="--amdgpu-target=gfx90a;gfx942 -D__HIP_PLATFORM_AMD__"
 ENV CFLAGS="-D__HIP_PLATFORM_AMD__"
 ENV CXXFLAGS="-D__HIP_PLATFORM_AMD__"
-# Install torch_memory_saver
+# Install 7
 # RUN pip install git+https://github.com/YangWang92/torch_memory_saver_numa.git --no-deps
 # RUN pip install "git+https://github.com/YangWang92/torch_memory_saver_numa.git@numa"
 RUN pip install "git+https://github.com/yushengsu-thu/torch_memory_saver.git"

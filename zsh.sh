@@ -29,13 +29,15 @@ docker run --gpus all \
   --ipc=host \
   --ulimit memlock=-1 \
   --ulimit stack=67108864 \
-  -v /data1/lilei:/data1/lilei \
+  -v /data1:/data1 \
   --network host \
-  --name openrlhfl \
-  -it nvcr.io/nvidia/pytorch:25.02-py3
+  --name sglang \
+  -it pytorch/pytorch:2.5.1-cuda12.4-cudnn9-devel
 
 zhuzilin/slime:latest
 
 nvcr.io/nvidia/pytorch:25.02-py3
 
 hebiaobuaa/verl:app-verl0.5-sglang0.4.9.post6-mcore0.12.2-te2.2
+
+nvcr.io/nvidia/cuda:12.4.0-devel-ubuntu22.04
