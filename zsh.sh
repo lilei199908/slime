@@ -37,8 +37,8 @@ sudo docker run --gpus all \
   --ulimit stack=67108864 \
   -v /data1:/data1 \
   --network host \
-  --name openrlhfl \
-  -it nvcr.io/nvidia/pytorch:25.02-py3
+  --name slimel \
+  -it zhuzilin/slime:latest
 
 zhuzilin/slime:latest
 
