@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1532fb32-1b90-466f-9fab-732e956ed96c" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/Dockerfile.rocm" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Dockerfile.rocm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zsh.sh" beforeDir="false" afterPath="$PROJECT_DIR$/zsh.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +85,8 @@
       <workItem from="1755515063563" duration="2494000" />
       <workItem from="1755589416844" duration="1851000" />
       <workItem from="1755663345297" duration="13667000" />
-      <workItem from="1755760200245" duration="3369000" />
+      <workItem from="1755760200245" duration="4443000" />
+      <workItem from="1756032786063" duration="12696000" />
     </task>
     <servers />
   </component>

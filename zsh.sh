@@ -19,20 +19,26 @@ source ~/.zshrc
 
 ray start --head \
   --node-ip-address=0.0.0.0 \
+  --port=6380 \
+  --object-manager-port=8076 \
+  --node-manager-port=8077 \
   --num-gpus=8 \
   --include-dashboard=true \
-  --dashboard-host=0.0.0.0
+  --dashboard-host=0.0.0.0 \
+  --dashboard-port=8266 \
+  --disable-usage-stats \
+  --dashboard-agent-listen-port=52380
 
-ray start --address=10.249.32.139:6379 --num-gpus=8
+ray start --address=10.249.32.139:6380 --num-gpus=8
 
-docker run --gpus all \
+sudo docker run --gpus all \
   --ipc=host \
   --ulimit memlock=-1 \
   --ulimit stack=67108864 \
   -v /data1:/data1 \
   --network host \
-  --name sglang \
-  -it pytorch/pytorch:2.5.1-cuda12.4-cudnn9-devel
+  --name openrlhfl \
+  -it nvcr.io/nvidia/pytorch:25.02-py3
 
 zhuzilin/slime:latest
 

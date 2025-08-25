@@ -44,12 +44,12 @@ ROLLOUT_ARGS=(
    --rm-type deepscaler
    --num-rollout 2
    --rollout-batch-size 30
-   --n-samples-per-prompt 16
+   --n-samples-per-prompt 8
    --rollout-max-response-len 2048
    --rollout-temperature 0.8
    --rollout-top-k 1
 
-   --global-batch-size 480
+   --global-batch-size 240
    --balance-data
 )
 
@@ -143,7 +143,7 @@ RUNTIME_ENV_JSON="{
   }
 }"
 
-ray job submit --address="http://127.0.0.1:8265" \
+ray job submit --address="http://127.0.0.1:8266" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 /data1/lilei/slime/train.py \
    --actor-num-nodes 2 \
