@@ -72,9 +72,9 @@ def train(args):
             ray.get(actor_model.async_offload())
             ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_WEIGHTS]))
 
-        ray.get(rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei'))
+        # ray.get(rollout_manager.rollout_engines[0].start_profile.remote('/data1/lilei'))
         ray.get(actor_model.async_update_weights())
-        ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
+        # ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
 
         if args.offload:
             ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_KV_CACHE]))
