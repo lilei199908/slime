@@ -105,7 +105,7 @@ OPTIMIZER_ARGS=(
 WANDB_ARGS=(
     --use-wandb
     --wandb-project qwen3
-    --wandb-group qwen3
+    --wandb-group qwen3-pipeline
     --wandb-key 050915f84696b83e5ad732155da9e54b5b408aeb
 )
 
