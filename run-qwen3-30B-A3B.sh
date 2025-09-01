@@ -137,7 +137,7 @@ ray start --head \
   --num-gpus=8 \
   --include-dashboard=true \
   --dashboard-host=0.0.0.0 \
-  --dashboard-port=8266 \
+  --dashboard-port=8267 \
   --disable-usage-stats \
   --dashboard-agent-listen-port=52380
 
