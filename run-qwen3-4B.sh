@@ -121,8 +121,8 @@ MISC_ARGS=(
 )
 
 # launch the master node of ray in container
-export MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
-ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
+#export MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
+#ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
 
 # Build the runtime environment JSON with proper variable substitution
 RUNTIME_ENV_JSON="{
@@ -132,8 +132,21 @@ RUNTIME_ENV_JSON="{
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\"
   }
 }"
+export MASTER_ADDR=${MASTER_ADDR:-"10.249.32.139"}
+#ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
+ray start --head \
+  --node-ip-address=10.249.32.139 \
+  --port=6380 \
+  --object-manager-port=8076 \
+  --node-manager-port=8077 \
+  --num-gpus=8 \
+  --include-dashboard=true \
+  --dashboard-host=0.0.0.0 \
+  --dashboard-port=8267 \
+  --disable-usage-stats \
+  --dashboard-agent-listen-port=52380
 
-ray job submit --address="http://127.0.0.1:8265" \
+ray job submit --address="http://127.0.0.1:8267" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 train.py \
    --actor-num-nodes 1 \
