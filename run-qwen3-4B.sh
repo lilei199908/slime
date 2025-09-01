@@ -101,7 +101,7 @@ WANDB_ARGS=(
     --use-wandb
     --wandb-project qwen3
     --wandb-group qwen3
-    --wandb-key b17ec32de4f9baf0bcfe168c2b0da45fa12d73cb
+    --wandb-key 050915f84696b83e5ad732155da9e54b5b408aeb
 )
 
 SGLANG_ARGS=(
