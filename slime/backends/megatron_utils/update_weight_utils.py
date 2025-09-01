@@ -444,7 +444,7 @@ class UpdateWeightFromTensor:
                 kwargs["load_format"] = "flattened_bucket"
 
             ref = self._ipc_engine.update_weights_from_tensor.remote(**kwargs)
-            self._pending_tensor_holds.append(converted_named_tensors)  # 增加引用
+            self._pending_tensor_holds.append(flattened_tensor_data)  # 增加引用
             self._pending_update_refs.append(ref)
             # ray.get(ref)
 
