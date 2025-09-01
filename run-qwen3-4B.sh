@@ -24,14 +24,13 @@ fi
 echo "HAS_NVLINK: $HAS_NVLINK (detected $NVLINK_COUNT NVLink references)"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-source "${SCRIPT_DIR}/scripts/models/qwen3-30B-A3B.sh"
-
+source "${SCRIPT_DIR}/scripts/models/qwen3-4B.sh"
 ROOT_PATH=/data1/lilei
 
 CKPT_ARGS=(
-   --hf-checkpoint ${ROOT_PATH}/Qwen3-30B-A3B
-   #--hf-checkpoint /root/Qwen3-30B-A3B-FP8
-   --ref-load ${ROOT_PATH}/Qwen3-30B-A3B_torch_dist
+   --hf-checkpoint ${ROOT_PATH}/Qwen3-4B
+   #--hf-checkpoint /root/Qwen3-4B-FP8
+   --ref-load ${ROOT_PATH}/Qwen3-4B_torch_dist
    --load ${ROOT_PATH}/Qwen3-4B_slime/
    --save ${ROOT_PATH}/Qwen3-4B_slime/
    --save-interval 20
@@ -47,7 +46,7 @@ ROLLOUT_ARGS=(
    --num-rollout 3000
    --rollout-batch-size 32
    --n-samples-per-prompt 1
-   --rollout-max-response-len 2048
+   --rollout-max-response-len 8192
    --rollout-temperature 0.8
 
    --global-batch-size 32
@@ -58,16 +57,16 @@ EVAL_ARGS=(
    --eval-interval 20
    --eval-prompt-data aime ${ROOT_PATH}/aime-2024/aime-2024.jsonl
    --n-samples-per-eval-prompt 1
-   --eval-max-response-len 2048
+   --eval-max-response-len 16384
    --eval-top-p 0.7
 )
 
 PERF_ARGS=(
-   --tensor-model-parallel-size 4
+   --tensor-model-parallel-size 2
    --sequence-parallel
    --pipeline-model-parallel-size 1
    --context-parallel-size 1
-   --expert-model-parallel-size 8
+   --expert-model-parallel-size 1
    --expert-tensor-parallel-size 1
 
    --recompute-granularity full
@@ -76,7 +75,7 @@ PERF_ARGS=(
 
    # --micro-batch-size 1
    --use-dynamic-batch-size
-   --max-tokens-per-gpu 20480
+   --max-tokens-per-gpu 9216
 )
 
 GRPO_ARGS=(
@@ -96,23 +95,18 @@ OPTIMIZER_ARGS=(
    --weight-decay 0.1
    --adam-beta1 0.9
    --adam-beta2 0.98
-
-   --optimizer-cpu-offload
-   --overlap-cpu-optimizer-d2h-h2d
-   --use-precision-aware-optimizer
 )
 
 WANDB_ARGS=(
-   #--use-wandb
+   # --use-wandb
    # --wandb-project slime-dev
-   # --wandb-group qwen3-30B-A3B-test
+   # --wandb-group qwen3-4B-test
    # --wandb-key ${WANDB_KEY}
 )
 
 SGLANG_ARGS=(
-   --rollout-num-gpus-per-engine 8
+   --rollout-num-gpus-per-engine 2
    --sglang-mem-fraction-static 0.7
-   --sglang-cuda-graph-bs 1 2 4 8 $(seq 16 8 256)
 )
 
 MISC_ARGS=(
@@ -127,6 +121,17 @@ MISC_ARGS=(
 )
 
 # launch the master node of ray in container
+#export MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
+#ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
+
+# Build the runtime environment JSON with proper variable substitution
+RUNTIME_ENV_JSON="{
+  \"env_vars\": {
+    \"PYTHONPATH\": \"/root/Megatron-LM/\",
+    \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
+    \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\"
+  }
+}"
 export MASTER_ADDR=${MASTER_ADDR:-"10.249.32.139"}
 #ray start --head --node-ip-address ${MASTER_ADDR} --num-gpus 8 --disable-usage-stats --dashboard-host=0.0.0.0 --dashboard-port=8265
 ray start --head \
@@ -141,20 +146,12 @@ ray start --head \
   --disable-usage-stats \
   --dashboard-agent-listen-port=52380
 
-# Build the runtime environment JSON with proper variable substitution
-RUNTIME_ENV_JSON="{
-  \"env_vars\": {
-    \"PYTHONPATH\": \"/root/Megatron-LM/\",
-    \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
-    \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\"
-  }
-}"
-
 ray job submit --address="http://127.0.0.1:8267" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
    -- python3 train.py \
    --actor-num-nodes 1 \
    --actor-num-gpus-per-node 8 \
+   --rollout-num-gpus-per-node 8 \
    --colocate \
    ${MODEL_ARGS[@]} \
    ${CKPT_ARGS[@]} \
