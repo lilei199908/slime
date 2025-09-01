@@ -98,10 +98,10 @@ OPTIMIZER_ARGS=(
 )
 
 WANDB_ARGS=(
-   # --use-wandb
-   # --wandb-project slime-dev
-   # --wandb-group qwen3-4B-test
-   # --wandb-key ${WANDB_KEY}
+    --use-wandb
+    --wandb-project qwen3
+    --wandb-group qwen3
+    --wandb-key b17ec32de4f9baf0bcfe168c2b0da45fa12d73cb
 )
 
 SGLANG_ARGS=(
