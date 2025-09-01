@@ -302,6 +302,9 @@ class UpdateWeightFromTensor:
         self.vocab_size = vocab_size
         self.quantization_config = quantization_config
         self.param_info_buckets = get_param_info_buckets(self.args, self.model)
+        self._pending_tensor_holds = []  # 用于持有 CUDA tensor 引用
+        self._pending_update_refs = []
+        self._max_concurrent_updates = 2  # 控制并发更新数量，避免内存爆炸
 
     def connect_rollout_engines(self, rollout_engines, rollout_engine_lock):
         self.rollout_engines = rollout_engines
@@ -328,6 +331,18 @@ class UpdateWeightFromTensor:
         dist.barrier(group=get_gloo_group())
         for param_infos in tqdm(self.param_info_buckets, disable=rank != 0, desc="Update weights"):
             self._update_bucket_weights_from_tensor(param_infos)
+
+            # 控制并发：如果 pending 太多，等待最老的一个完成
+            if len(self._pending_update_refs) >= self._max_concurrent_updates:
+                oldest_ref = self._pending_update_refs.pop(0)
+                ray.get(oldest_ref)  # 等待一个完成
+                self._pending_tensor_holds.pop(0)
+
+        # Step: 等待所有剩余更新完成
+        for ref in self._pending_update_refs:
+            ray.get(ref)
+        self._pending_update_refs.clear()
+        self._pending_tensor_holds.clear()
 
         dist.barrier(group=get_gloo_group())
 
@@ -429,7 +444,9 @@ class UpdateWeightFromTensor:
                 kwargs["load_format"] = "flattened_bucket"
 
             ref = self._ipc_engine.update_weights_from_tensor.remote(**kwargs)
-            ray.get(ref)
+            self._pending_tensor_holds.append(converted_named_tensors)  # 增加引用
+            self._pending_update_refs.append(ref)
+            # ray.get(ref)
 
 
 class UpdateWeightFromDistributed:
