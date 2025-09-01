@@ -304,7 +304,7 @@ class UpdateWeightFromTensor:
         self.param_info_buckets = get_param_info_buckets(self.args, self.model)
         self._pending_tensor_holds = []  # 用于持有 CUDA tensor 引用
         self._pending_update_refs = []
-        self._max_concurrent_updates = 2  # 控制并发更新数量，避免内存爆炸
+        self._max_concurrent_updates = 3  # 控制并发更新数量，避免内存爆炸
 
     def connect_rollout_engines(self, rollout_engines, rollout_engine_lock):
         self.rollout_engines = rollout_engines
