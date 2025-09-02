@@ -71,7 +71,7 @@ def train(args):
         if args.offload:
             ray.get(actor_model.async_offload())
             ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_WEIGHTS]))
-
+        rollout_manager.rollout_engines[0].start_profile(output_dir='/data1/lilei',start_step=1,num_steps=2)
         ray.get(actor_model.async_update_weights())
 
         if args.offload:
