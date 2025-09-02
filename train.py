@@ -1,3 +1,5 @@
+import time
+
 import ray
 
 from slime.ray.placement_group import create_actor_group, create_placement_groups, create_rollout_manager
@@ -71,8 +73,11 @@ def train(args):
         if args.offload:
             ray.get(actor_model.async_offload())
             ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_WEIGHTS]))
-        ray.get(rollout_manager.rollout_engines[0].start_profile.remote(output_dir='/data1/lilei',start_step=1,num_steps=2))
+        ray.get(rollout_manager.rollout_engines[0].start_profile.remote(output_dir='/data1/lilei/once'))
         ray.get(actor_model.async_update_weights())
+        import time
+        time.sleep(10)
+        ray.get(rollout_manager.rollout_engines[0].stop_profile.remote())
 
         if args.offload:
             ray.get(rollout_manager.async_onload(tags=[GPU_MEMORY_TYPE_KV_CACHE]))
