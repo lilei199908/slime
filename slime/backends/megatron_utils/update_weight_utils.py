@@ -325,26 +325,34 @@ class UpdateWeightFromTensor:
 
     @torch.no_grad()
     def update_weights(self):
-        rank = dist.get_rank()
-        if rank == 0:
-            ray.get([engine.flush_cache.remote() for engine in self.rollout_engines])
-        dist.barrier(group=get_gloo_group())
-        for param_infos in tqdm(self.param_info_buckets, disable=rank != 0, desc="Update weights"):
-            self._update_bucket_weights_from_tensor(param_infos)
+        with torch.profiler.profile(
+                on_trace_ready=torch.profiler.tensorboard_trace_handler("/data1/lilei/once"),
+                record_shapes=True,
+                with_stack=True,
+                profile_memory=True,
+                with_flops=True,
+            ) as prof:
+            rank = dist.get_rank()
+            if rank == 0:
+                ray.get([engine.flush_cache.remote() for engine in self.rollout_engines])
+            dist.barrier(group=get_gloo_group())
+            for param_infos in tqdm(self.param_info_buckets, disable=rank != 0, desc="Update weights"):
+                self._update_bucket_weights_from_tensor(param_infos)
 
-            # 控制并发：如果 pending 太多，等待最老的一个完成
-            if len(self._pending_update_refs) >= self._max_concurrent_updates:
-                oldest_ref = self._pending_update_refs.pop(0)
-                ray.get(oldest_ref)  # 等待一个完成
-                self._pending_tensor_holds.pop(0)
+                # 控制并发：如果 pending 太多，等待最老的一个完成
+                if len(self._pending_update_refs) >= self._max_concurrent_updates:
+                    oldest_ref = self._pending_update_refs.pop(0)
+                    ray.get(oldest_ref)  # 等待一个完成
+                    self._pending_tensor_holds.pop(0)
 
-        # Step: 等待所有剩余更新完成
-        for ref in self._pending_update_refs:
-            ray.get(ref)
-        self._pending_update_refs.clear()
-        self._pending_tensor_holds.clear()
+            # Step: 等待所有剩余更新完成
+            for ref in self._pending_update_refs:
+                ray.get(ref)
+            self._pending_update_refs.clear()
+            self._pending_tensor_holds.clear()
 
-        dist.barrier(group=get_gloo_group())
+            dist.barrier(group=get_gloo_group())
+            prof.step()
 
     def _update_bucket_weights_from_tensor(self, param_infos):
         monkey_patch_torch_reductions()
