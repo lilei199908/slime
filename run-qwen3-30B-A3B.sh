@@ -48,7 +48,7 @@ ROLLOUT_ARGS=(
    --rollout-batch-size 30
    --n-samples-per-prompt 8
    --rollout-max-response-len 2048
-   --rollout-temperature 0.01
+   --rollout-temperature 0.1
 
    --global-batch-size 240
    --balance-data
