@@ -44,13 +44,13 @@ ROLLOUT_ARGS=(
    --apply-chat-template
    --rollout-shuffle
    --rm-type deepscaler
-   --num-rollout 3000
-   --rollout-batch-size 32
-   --n-samples-per-prompt 1
+   --num-rollout 5
+   --rollout-batch-size 30
+   --n-samples-per-prompt 8
    --rollout-max-response-len 2048
-   --rollout-temperature 0.8
+   --rollout-temperature 0.01
 
-   --global-batch-size 32
+   --global-batch-size 240
    --balance-data
 )
 
@@ -105,7 +105,7 @@ OPTIMIZER_ARGS=(
 WANDB_ARGS=(
     --use-wandb
     --wandb-project qwen3
-    --wandb-group qwen3
+    --wandb-group qwen3-pipeline
     --wandb-key 050915f84696b83e5ad732155da9e54b5b408aeb
 )
 
