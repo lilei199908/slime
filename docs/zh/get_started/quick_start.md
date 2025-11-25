@@ -36,18 +36,6 @@ docker run --rm --gpus all --ipc=host --shm-size=16g \
   -it slimerl/slime:latest /bin/bash
 ```
 
-### 安装 slime
-
-进入 Docker 容器后，请按照以下步骤克隆 slime 仓库并进行安装：
-
-```bash
-# 路径可根据实际情况调整
-cd /root/
-git clone https://github.com/THUDM/slime.git
-cd slime
-pip install -e .
-```
-
 ## 模型与数据集下载
 
 可以从 Hugging Face、ModelScope 等平台下载所需的模型和数据集。以下是使用 `huggingface_hub` 下载示例资源的命令：
