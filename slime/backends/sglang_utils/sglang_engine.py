@@ -156,8 +156,8 @@ class SGLangEngine(RayActor):
             port,
             self.worker_type,
             disaggregation_bootstrap_port,
-            base_gpu_id=self.base_gpu_id,
             remote_seed_instance,
+            base_gpu_id=self.base_gpu_id,
         )
 
         self.node_rank = server_args_dict["node_rank"]
@@ -170,11 +170,11 @@ class SGLangEngine(RayActor):
             self._init_normal(server_args_dict)
 
     def get_server_host(self):
-        """Get the server host address."""
+        """Get the server host address. Required for Ray actor access."""
         return self.server_host
 
     def get_server_port(self):
-        """Get the server port."""
+        """Get the server port. Required for Ray actor access."""
         return self.server_port
 
     def _init_external(self, expect_server_args, external_engine_need_check_fields):
@@ -479,8 +479,8 @@ def _compute_server_args(
     port,
     worker_type: str = "regular",
     disaggregation_bootstrap_port: int | None = None,
-    base_gpu_id: int | None = None,
     remote_seed_instance: dict | None = None,
+    base_gpu_id: int | None = None,
 ):
     """Compute server arguments for SGLang engine.
 
