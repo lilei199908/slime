@@ -76,7 +76,7 @@ class RolloutManager:
         self.nodes_per_engine = max(1, args.rollout_num_gpus_per_engine // args.num_gpus_per_node)
         self.rollout_engine_lock = Lock.options(num_cpus=1, num_gpus=0).remote()
         self.rollout_id = -1
-
+        self.need_connect_train_actors = True
         self._metric_checker = MetricChecker.maybe_create(args)
         self._health_monitor = None
         if self.args.use_fault_tolerance:
@@ -118,7 +118,10 @@ class RolloutManager:
         return self.all_rollout_engines[:: self.nodes_per_engine]
 
     def get_rollout_engines_and_lock(self):
-        return self.rollout_engines, self.rollout_engine_lock, self.num_new_engines
+        return self.rollout_engines, self.rollout_engine_lock, self.num_new_engines, self.need_connect_train_actors
+
+    def set_need_connect_train_actors(self, value: bool):
+        self.need_connect_train_actors = value
 
     def get_num_rollout_per_epoch(self):
         assert self.args.rollout_global_dataset
@@ -191,7 +194,10 @@ class RolloutManager:
             ray.get([engine.release_memory_occupation.remote() for engine in new_engines])
             ray.get([engine.resume_memory_occupation.remote(tags=[GPU_MEMORY_TYPE_WEIGHTS]) for engine in new_engines])
 
-        return self.rollout_engines, self.rollout_engine_lock, self.num_new_engines
+        if len(dead_indices) > 0:
+            self.need_connect_train_actors = True
+
+        return self.rollout_engines, self.rollout_engine_lock, self.num_new_engines, self.need_connect_train_actors
 
     def clear_num_new_engines(self):
         # when fault tolerance is not enabled, we need to manually clear num_new_engines after update_weights

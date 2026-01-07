@@ -212,7 +212,7 @@ class RolloutHealthMonitor:
             ray.get(engine.health_generate.remote(timeout=self._check_timeout))
         except Exception as e:
             logger.error(
-                f"Health check failed for rollout engine {rollout_engine_id} (ray timeout or error). Killing actor. Exception: {e}"
+                f"Health check failed for rollout engine {rollout_engine_id} (ray timeout or error). Killing and restarting actor. Exception: {e}"
             )
             self._kill_and_restart_engine(rollout_engine_id=rollout_engine_id)
 
@@ -245,6 +245,7 @@ class RolloutHealthMonitor:
             from slime.ray.rollout import init_rollout_engines
 
             init_rollout_engines(args, self._rollout_manager.pg, self._rollout_manager.all_rollout_engines)
+            self._rollout_manager.need_connect_train_actors = True
             logger.info(f"Successfully restarted engine group {rollout_engine_id}")
         except Exception as e:
             logger.error(f"Failed to restart engine group {rollout_engine_id}: {e}")
