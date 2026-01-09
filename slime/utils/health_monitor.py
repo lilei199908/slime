@@ -245,7 +245,7 @@ class RolloutHealthMonitor:
             from slime.ray.rollout import init_rollout_engines
 
             init_rollout_engines(args, self._rollout_manager.pg, self._rollout_manager.all_rollout_engines)
-            self._rollout_manager.need_connect_train_actors = True
+            self._rollout_manager.set_need_connect_train_actors(True)
             logger.info(f"Successfully restarted engine group {rollout_engine_id}")
         except Exception as e:
             logger.error(f"Failed to restart engine group {rollout_engine_id}: {e}")
